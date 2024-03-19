@@ -1,0 +1,46 @@
+A REusable API code script:-                                                                                                                                                                // Variable declaration
+constresponseJson =xml2Json(pm.response.text()); // Convert xml to JSON
+//console.log(responseJson);
+constcsvData =pm.iterationData.toObject(); // Access CSV data
+constactualResponseCode =pm.response.code; // Fetch the actual response code from response body.
+consttestType =(csvData.ScenarioType).toUpperCase();//Convert testType into Upper case.
+// Test assertions
+if(testType ==="POSITIVE") {
+   switch(csvData.expectedResponseCode) {
+       case201:
+           // Verify the expected response is same as actual response code.
+           pm.test(`Expected response code: ${csvData.expectedResponseCode} and Actual response code: ${actualResponseCode}`, () =>{
+               pm.expect(actualResponseCode).to.equal(csvData.expectedResponseCode);
+           });
+           /* Check the corresponding field values as per API functionality verification is same in input csv and response payload */
+           break;
+
+       default:
+           pm.test(`Response code mismatch.`, () =>{
+               pm.expect.fail(`Expected response code: ${csvData.expectedResponseCode} and Actual response code: ${pm.response.code}`);
+           });
+           break;
+   }
+} elseif(testType ==="NEGATIVE") {
+   switch(csvData.expectedResponseCode) {
+       case400:
+           // Verify the expected response is same as actual response code.
+           pm.test(`Expected response code: ${csvData.expectedResponseCode} and Actual response code: ${actualResponseCode}`, () =>{
+               pm.expect(actualResponseCode).to.equal(csvData.expectedResponseCode);
+           });
+           // Verify the expected error code is same as actual error code.
+           pm.test(`Expected error code: ${csvData.Code} and Received error code: ${responseJson.error["code"]}`, () =>{
+               pm.expect(responseJson.error["code"]).to.equal(csvData.Code);
+           });
+           break;
+       default:
+           pm.test(`Response code mismatch.`, () =>{
+               pm.expect.fail(`Expected response code: ${csvData.expectedResponseCode} and Actual response code: ${actualResponseCode}`);
+           });
+           break;
+   }
+} else{
+   pm.test(`Unhandled scenario testType: ${testType}`, () =>{
+       pm.expect.fail(`scenario type should be POSITIVE or NEGATIVE`);
+   });
+}
